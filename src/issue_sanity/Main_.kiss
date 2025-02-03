@@ -1,2 +1,22 @@
 (import kiss_firefox.API)
-(set js.Lib.global.document.body.style.border "5px solid red")
+(import js.Browser)
+
+(var &mut issueListHtml "")
+
+(let [document Browser.document
+        window Browser.window
+        href Browser.location.href]
+    (localFunction :Void applyFilter []
+        (unless (= document.readyState "complete") (return))
+        (cond
+            ((href.endsWith "issues")
+                (let [issueList (document.querySelector ".ListView-module__ul--vMLEZ")
+                        confirmLink (document.createElement "a")]
+                    (unless issueListHtml
+                        (set issueListHtml issueList.innerHTML))
+                    (set issueList.innerHTML "")
+                    (set confirmLink.innerHTML "Really look into the unfiltered abyss")
+                    (confirmLink.addEventListener "click" ->(set issueList.innerHTML issueListHtml))
+                    (issueList.appendChild confirmLink)))))
+    (document.addEventListener "readystatechange" applyFilter)
+    (window.addEventListener "focus" applyFilter))
