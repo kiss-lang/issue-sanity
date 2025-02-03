@@ -1,0 +1,21 @@
+{
+	"name": "issue-sanity",
+	"description": "Prevent me from looking too long into the abyss",
+	"icons": {
+		"48": "icons/icon-48.png"
+	},
+	"content_scripts": [
+		{
+			"js": [
+				"bin/browser-polyfill.js",
+				"bin/main.js"
+			],
+			"matches": [
+				"https://github.com/*/*/issues",
+				"https://github.com/*/*/milestone/*"
+			]
+		}
+	],
+	"version": "0.0",
+	"manifest_version": 2
+}

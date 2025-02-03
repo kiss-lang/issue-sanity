@@ -1,0 +1,16 @@
+{
+	"main": "index.js",
+	"name": "issue-sanity",
+	"description": "Prevent me from looking too long into the abyss",
+	"dependencies": {
+		"webextension-polyfill": "^0.10.0",
+		"@types/webextension-polyfill": "^0.10.0"
+	},
+	"devDependencies": {
+		"dts2hx": "^0.19.0"
+	},
+	"version": "0.0.0",
+	"scripts": {
+		"postinstall": "dts2hx --all --noLibWrap"
+	}
+}
