@@ -1,0 +1,21 @@
+(defMacroVar mainKissFile kissFile)
+(loadFrom "kiss-firefox" "src/kiss_firefox/Util.kiss")
+(loadFrom "kiss-firefox" "src/kiss_firefox/BackgroundUtil.kiss")
+
+(var &mut :Int currentTab null)
+
+(onMessage "setCurrentTab" []
+    (awaitLet [tabs (API.browser.tabs.query (object active true))]
+        (set currentTab (Std.int .id (first tabs)))
+        (sendResponse "")))
+
+(onMessage "scrapeChecklist" [url]
+    (awaitLet [tab (API.browser.tabs.create (objectWith url))]
+        (runCode tab ~"
+            var checklists = document.getElementsByClassName('contains-task-list');
+            browser.runtime.sendMessage({type: 'checklistSourceBg', data: [${tab.id}, '${url}', checklists[0].outerHTML]});
+            ")))
+
+(onMessage "checklistSourceBg" [tabId tabUrl source]
+    (sendMessage currentTab "checklistSourceMain" [(Std.int tabId) tabUrl source])
+    (API.browser.tabs.remove (Std.int tabId)))

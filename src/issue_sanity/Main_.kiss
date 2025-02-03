@@ -1,8 +1,14 @@
-(import kiss_firefox.API)
+(defMacroVar mainKissFile kissFile)
+(loadFrom "kiss-firefox" "src/kiss_firefox/Util.kiss")
+(loadFrom "kiss-firefox" "src/kiss_firefox/ContentUtil.kiss")
+(using haxe.io.Path)
 (import js.Browser)
 
 (var &mut issueListHtml "")
 (var &mut issueListHref "")
+(var &mut milestoneDone "")
+
+(var :Map<String,Dynamic> issueDivs (new Map))
 
 (let [document Browser.document
         window Browser.window
@@ -21,6 +27,21 @@
                     (set issueList.innerHTML "")
                     (set confirmLink.innerHTML "Really look into the unfiltered abyss")
                     (confirmLink.addEventListener "click" ->(set issueList.innerHTML issueListHtml))
-                    (issueList.appendChild confirmLink)))))
+                    (issueList.appendChild confirmLink)))
+            // Milestone view: Expand checklists
+            ((href.contains "milestone/")
+                (when (= milestoneDone href) (return))
+                (set milestoneDone href)
+                (awaitLet [_ (sendMessage "setCurrentTab" [])]
+                    (let [checklistElements (document.getElementsByTagName "tracked-issues-progress")
+                            checklistIssueDivs (for element checklistElements element.parentElement.parentElement.parentElement)
+                            checklistIssueHrefs (for div checklistIssueDivs (.getAttribute (first (div.getElementsByTagName "a")) "href"))]
+                        (doFor [issueDiv issueHref] (zip checklistIssueDivs checklistIssueHrefs)
+                            (dictSet issueDivs "https://github.com${issueHref}" issueDiv)
+                            (sendMessage "scrapeChecklist" ["https://github.com${issueHref}"])))))))
     (document.addEventListener "readystatechange" applyFilter)
     (window.addEventListener "focus" applyFilter))
+
+(onMessage "checklistSourceMain" [tabId url source]
+    (let [issueDiv (dictGet issueDivs url)]
+        (+= issueDiv.innerHTML source)))

@@ -3,6 +3,12 @@
 -cp externs
 -cp src
 -dce full
+--each
+
 --main issue_sanity.Main
 --js bin/main.js
+--next
+
+--main issue_sanity.Background
+--js bin/background.js
 -cmd cp node_modules/webextension-polyfill/dist/browser-polyfill.js* bin/ && zip -r issue_sanity.zip . -x *.git* -x *.hxml -x *.zip -x src/\* -x node_modules/\* -x libs/\* -x test.sh -x externs/\*
