@@ -2,6 +2,7 @@
 (import js.Browser)
 
 (var &mut issueListHtml "")
+(var &mut issueListHref "")
 
 (let [document Browser.document
         window Browser.window
@@ -9,11 +10,14 @@
     (localFunction :Void applyFilter []
         (unless (= document.readyState "complete") (return))
         (cond
+            // Unfiltered issue list: Hide it
             ((href.endsWith "issues")
                 (let [issueList (document.querySelector ".ListView-module__ul--vMLEZ")
                         confirmLink (document.createElement "a")]
-                    (unless issueListHtml
-                        (set issueListHtml issueList.innerHTML))
+                    (unless issueList (return))
+                    (unless (and issueListHtml (= href issueListHref))
+                        (set issueListHtml issueList.innerHTML)
+                        (set issueListHref href))
                     (set issueList.innerHTML "")
                     (set confirmLink.innerHTML "Really look into the unfiltered abyss")
                     (confirmLink.addEventListener "click" ->(set issueList.innerHTML issueListHtml))
